@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: moderation-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      apps: moderation
+  template:
+    metadata:
+      labels:
+        apps: moderation
+    spec:
+      containers:
+        - name: moderation
+          image: joshuaombasa/cluester2-test-moderation
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: evenmoderation
+spec:
+  selector:
+    apps: moderation
+  ports:
+    - name: moderation
+      protocol: TCP
+      port: 3033
+      targetPort: 3033
+
+          
