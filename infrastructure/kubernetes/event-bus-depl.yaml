@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: event-bus-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      apps: event-bus
+  template:
+    metadata:
+      labels:
+        apps: event-bus
+    spec:
+      containers:
+        - name: event-bus
+          image: joshuaombasa/cluester2-test-event-bus
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-bus-srv
+spec:
+  selector:
+    apps: event-bus
+  ports:
+    - name: event-bus
+      protocol: TCP
+      port: 3035
+      targetPort: 3035
+
+          
