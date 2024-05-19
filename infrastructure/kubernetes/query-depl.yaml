@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: query-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      apps: query
+  template:
+    metadata:
+      labels:
+        apps: query
+    spec:
+      containers:
+        - name: query
+          image: joshuaombasa/cluester2-test-query
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: query-srv
+spec:
+  selector:
+    apps: query
+  ports:
+    - name: query:
+      protocol: TCP
+      port: 3034
+      targetPort: 3034
+
+          
