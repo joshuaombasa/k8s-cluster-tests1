@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      apps: comments
+  template:
+    metadata:
+      labels:
+        apps: comments
+    spec:
+      containers:
+        - name: comments
+          image: joshuaombasa/cluester2-test-comments
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-srv
+spec:
+  selector:
+    apps: comments
+  ports:
+    - name: comments
+      protocol: TCP
+      port: 4031
+      targetPort: 4031 
+      
