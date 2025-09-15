@@ -1,42 +1,23 @@
-const express = require('express')
-const cors = require('cors')
-const { randomBytes } = require('crypto')
-const axios = require('axios')
+const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
 
-const PORT = 3035
+const PORT = 3035;
 
-const events = {}
+// Store events in memory
+const events = {};
 
-const app = express()
+const app = express();
 
-app.use(express.json())
-app.use(cors())
+app.use(express.json());
+app.use(cors());
 
-app.post('/api/events', async (request, response) => {
-  const event = request.body
-  console.log(event)
+// Handle incoming events
+app.post('/api/events', async (req, res) => {
+  const event = req.body;
+  console.log('Received event:', event);
 
-
-  try {
-    await axios.post('http://localhost:3034/api/events',event)
-    await axios.post('http://localhost:3030/api/events',event)
-    await axios.post('http://localhost:3031/api/events',event)
-    await axios.post('http://localhost:3033/api/events',event)
-  } catch (error) {
-    console.log(error)
-  }
-
-  response.send({})
-})
-
-app.get('/api/events', (request, response) => {
-  response.send(events)
-})
-
-
-
-app.listen(PORT, () => {
-  console.log(`server listening on post ${PORT}`)
-})
-
-
+  const services = [
+    'http://localhost:3034/api/events',
+    'http://localhost:3030/api/events',
+    'http://localhost
