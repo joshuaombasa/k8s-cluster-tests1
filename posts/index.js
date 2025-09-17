@@ -1,47 +1,58 @@
-const express = require('express')
-const cors = require('cors')
-const { randomBytes } = require('crypto')
+const express = require('express');
+const cors = require('cors');
+const { randomBytes } = require('crypto');
+const axios = require('axios');
 
-const axios = require('axios')
+const PORT = process.env.PORT || 3030;
+const EVENT_BUS_URL = process.env.EVENT_BUS_URL || 'http://localhost:3035/api/events';
 
-const PORT = 3030
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-const posts = {}
+const posts = {};
 
-const app = express()
+// Create a new post
+app.post('/api/posts', async (req, res) => {
+  const { post } = req.body;
 
-app.use(express.json())
-app.use(cors())
-
-app.post('/api/posts', async (request, response) => {
-  const { post } = request.body
-  const id = randomBytes(8).toString('hex')
-  posts[id] = { id, post }
-
-  try {
-    await axios.post('http://localhost:3035/api/events', {
-      type: 'postCreated',
-      data: { id, post }
-    })
-  } catch (error) {
-    console.log(error)
+  if (!post || typeof post !== 'string') {
+    return res.status(400).json({ error: 'Post content is required and must be a string.' });
   }
 
-  response.send(posts)
-})
+  const id = randomBytes(8).toString('hex');
+  const newPost = { id, post };
+  posts[id] = newPost;
 
-app.post('/api/events', (request, response) => {
-  const event = request.body
-  console.log(event)
-  response.send({})
-})
+  try {
+    await axios.post(EVENT_BUS_URL, {
+      type: 'PostCreated',
+      data: newPost
+    });
+  } catch (error) {
+    console.error('Error sending event to Event Bus:', error.message);
+  }
 
-app.get('/api/posts', (request, response) => {
-  response.send(posts)
-})
+  res.status(201).json(newPost);
+});
+
+// Handle incoming events
+app.post('/api/events', (req, res) => {
+  const event = req.body;
+  console.log('Received Event:', event.type);
+  res.sendStatus(200);
+});
+
+// Get all posts
+app.get('/api/posts', (req, res) => {
+  res.json(posts);
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime() });
+});
 
 app.listen(PORT, () => {
-  console.log(`server listening on post ${PORT}`)
-})
-
-
+  console.log(`🚀 Server listening on port ${PORT}`);
+});
